@@ -27,7 +27,7 @@ import tdklatt
 Now, every class and function provided by tdklatt is available to you in that namespace. To synthesize a speech waveform, try the following:
 
 ```python
-s = klatt_make() # Creates a Klatt synthesizer w/ default settings
+s = tdklatt.klatt_make() # Creates a Klatt synthesizer w/ default settings
 s.run()
 # s.output contains the output waveform
 ```
