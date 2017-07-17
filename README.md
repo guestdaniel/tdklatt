@@ -24,6 +24,14 @@ Once you have the repository on your computer, launch a Python 3 session in that
 import tdklatt
 ```
 
+Now, every class and function provided by tdklatt is available to you in that namespace. To synthesize a speech waveform, try the following:
+
+```python
+s = klatt_make() # Creates a Klatt synthesizer w/ default settings
+s.run()
+# s.output contains the output waveform
+```
+
 [1]: http://asa.scitation.org/doi/abs/10.1121/1.383940
 [2]: https://github.com/guestdaniel/trackdraw
 

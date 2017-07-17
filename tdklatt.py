@@ -20,12 +20,14 @@ Functions:
 
 Examples:
     Create a synthesizer with default settings, run it, and hear the output.
+    >>> from tdklatt import *
     >>> s = klatt_make()
     >>> s.run()
     >>> import sounddevice as sd
     >>> sd.play(data=s.output, samplerate=s.params["FS"])
 
     Create a synthesizer, change the F0, and hear the output.
+    >>> from tdklatt import *
     >>> s = klatt_make()
     >>> s.params["F0"] = np.ones(s.params["N_SAMP"])*200 # Change F0 to 200 Hz
     >>> s.run()
