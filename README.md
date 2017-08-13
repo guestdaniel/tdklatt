@@ -29,8 +29,36 @@ Now, every class and function provided by tdklatt is available to you in that na
 ```python
 s = tdklatt.klatt_make() # Creates a Klatt synthesizer w/ default settings
 s.run()
-# s.output contains the output waveform
 ```
+
+To play the waveform you just synthesized, try the following:
+
+```python
+s.play()
+```
+
+Synthesis parameters are stored in `s.params`, which is a standard dictionary. The names of parameters are typically the same as in [the Klatt paper][1], but there may be some exceptions. To see a list of parameters along with explanations, simply access the docstrings of NTVParams1980 (for non-time-varying parameters) and TVParams1980 (for time-varying parameters).
+
+```python
+help(tdklatt.NTVParams1980)
+help(tdklatt.TVParams1980)
+```
+
+To see how different parameters are internally represented, you can call the params dictionary:
+
+```python
+s.params
+```
+
+To change a parameter, simply modify or replace existing values appropriately. For example, F0 is represented as a numpy.array with length N\_SAMP, so we can replace it with a new numpy array to change the F0.
+
+```
+s.params["F0"] = np.ones(s.params["N_SAMP"])*200 # Change F0 to steady-state 200 Hz
+s.run() # Rerun synthesizer
+s.play() # Hear the result of the higher F0
+```
+
+Currently, only time-varying parameters can be changed in place. Future versions will implement the ability to change non-time-varying parameteres as well without re-creating the Synth object.
 
 [1]: http://asa.scitation.org/doi/abs/10.1121/1.383940
 [2]: https://github.com/guestdaniel/trackdraw

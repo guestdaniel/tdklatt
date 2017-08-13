@@ -23,20 +23,25 @@ Examples:
     >>> from tdklatt import *
     >>> s = klatt_make()
     >>> s.run()
-    >>> import sounddevice as sd
-    >>> sd.play(data=s.output, samplerate=s.params["FS"])
+    >>> s.play()
 
     Create a synthesizer, change the F0, and hear the output.
     >>> from tdklatt import *
     >>> s = klatt_make()
     >>> s.params["F0"] = np.ones(s.params["N_SAMP"])*200 # Change F0 to 200 Hz
     >>> s.run()
-    >>> import sounddevice as sd
-    >>> sd.play(data=s.output, samplerate=s.params["FS"])
+    >>> s.play()
 """
 
-import math
-import numpy as np
+try:
+    import math
+    import numpy as np
+    import sounddevice as sd
+except ImportError:
+    print("Missing one or more required modules.")
+    print("Please make sure that math, numpy, and sounddevice are installed.")
+    import sys
+    sys.exit()
 
 def klatt_make(tvparams=None, ntvparams=None):
     """
@@ -197,6 +202,11 @@ class KlattSynth(object):
         params (dictionary): Dictionary of parameters, all entries are
             initialized as None and are set later
 
+    Methods:
+        setup: Run after parameter values are set, initializes synthesizer
+        run: Clears current output vector and runs synthesizer
+        play: Plays output via sounddevice module
+
     KlattSynth contains all necessary synthesis parameters in an attribute
     called params. The synthesis routine is organized around the concept of
     sections and components. Sections are objects which represent organizational
@@ -308,6 +318,14 @@ class KlattSynth(object):
             section.run()
         self.output[:] = self.output_module.output[:]
 
+    def play(self):
+        """
+        Plays output waveform.
+
+        Uses sounddevice to play output waveform.
+        """
+        sd.play(data=self.output, samplerate=self.params["FS"])
+
 
 ##### CLASS DEFINITIONS #####
 class KlattSection:
@@ -324,6 +342,13 @@ class KlattSection:
             inputs, if it has any
         outs (list): list of Buffer objects for handling this Section's
             outputs, if it has any
+
+    Methods:
+        connect: Used to connect two sections
+        process_ins: Processes all input buffers
+        process_outs: Processes all output buffers
+        run: Calls self.do(), which processes the signal by calling components'
+            methods as necessary
 
     An operational Section needs two custom methods to be implemented on top of
     the default methods provided by the class definition:
@@ -406,6 +431,11 @@ class KlattComponent:
         dests (list): see Arguments
         input (Numpy array): input vector, length N_SAMP
         output (Numpy array): output vector, length N_SAMP
+
+    Methods:
+        receive: Changes input vector
+        send: Propagates output to all destinations
+        connect: Used to connect two components together
 
     Components are small signal processing units (e.g., filters, amplifiers)
     which compose Sections. Components are connected at the Section level using
