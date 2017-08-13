@@ -52,7 +52,7 @@ s.params
 
 To change a parameter, simply modify or replace existing values appropriately. For example, F0 is represented as a numpy.array with length N\_SAMP, so we can replace it with a new numpy array to change the F0.
 
-```
+```python
 s.params["F0"] = np.ones(s.params["N_SAMP"])*200 # Change F0 to steady-state 200 Hz
 s.run() # Rerun synthesizer
 s.play() # Hear the result of the higher F0
