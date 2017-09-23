@@ -314,6 +314,10 @@ class KlattSynth(object):
         from the final section (output_module).
         """
         self.output[:] = np.zeros(self.params["N_SAMP"])
+        # Clear inputs and outputs in each component
+        for section in self.sections:
+            for component in section.components:
+                component.clean()
         for section in self.sections:
             section.run()
         self.output[:] = self.output_module.output[:]
@@ -361,6 +365,7 @@ class KlattSection:
     """
     def __init__(self, mast):
         self.mast = mast
+        self.components = []
         self.ins = []
         self.outs = []
 
@@ -495,6 +500,9 @@ class KlattComponent:
         for component in components:
             self.dests.append(component)
 
+    def clean(self):
+        self.input = np.zeros(self.mast.params["N_SAMP"])
+        self.output = np.zeros(self.mast.params["N_SAMP"])
 
 ##### SECTION DEFINITIONS #####
 class KlattVoice1980(KlattSection):
@@ -538,6 +546,8 @@ class KlattVoice1980(KlattSection):
         self.avs = Amplifier(mast=self.mast)
         self.mixer = Mixer(mast=self.mast)
         self.switch = Switch(mast=self.mast)
+        self.components = [self.impulse, self.rgp, self.rgz, self.rgs, \
+                           self.av, self.avs, self.mixer, self.switch]
 
     def patch(self):
         self.impulse.connect([self.rgp])
@@ -582,6 +592,7 @@ class KlattNoise1980(KlattSection):
         self.noisegen = Noisegen(mast=self.mast)
         self.lowpass = Lowpass(mast=self.mast)
         self.amp = Amplifier(mast=self.mast)
+        self.components = [self.noisegen, self.lowpass, self.amp]
 
     def patch(self):
         self.noisegen.connect([self.lowpass])
@@ -630,6 +641,8 @@ class KlattCascade1980(KlattSection):
         self.formants = []
         for form in range(self.mast.params["N_FORM"]):
             self.formants.append(Resonator(mast=self.mast))
+        self.components = [self.ah, self.mixer, self.rnp, self.rnz] + \
+            self.formants
 
     def patch(self):
         self.ins[0].connect([self.mixer])
@@ -734,6 +747,12 @@ class KlattParallel1980(KlattSection):
         # to it... need to keep reading Klatt 1980.
         self.ab = Amplifier(mast=self.mast)
         self.output_mixer = Mixer(mast=self.mast)
+        self.components = [self.af, self.a1, self.r1, self.first_diff, \
+                           self.mixer, self.an, self.rnp, self.a2, self.r2, \
+                           self.r1, self.first_diff, self.mixer, self.an, \
+                           self.rnp, self.a2, self.r2, self.a3, self.r3, \
+                           self.a4, self.r4, self.a5, self.r5, self.a6, \
+                           self.r6, self.ab, self.output_mixer]
 
     def patch(self):
         self.ins[1].connect([self.af])
@@ -748,7 +767,7 @@ class KlattParallel1980(KlattSection):
         self.a4.connect([self.r4])
         self.a5.connect([self.r5])
         self.r6.connect([self.r6])
-        for item in [self.r1, self.r2, self.r3, self.r4, self.r5,
+        for item in [self.r1, self.r2, self.r3, self.r4, self.r5, \
                      self.r6, self.rnp, self.ab]:
             item.connect([self.output_mixer])
         self.output_mixer.connect([*self.outs])
@@ -798,6 +817,7 @@ class KlattRadiation1980(KlattSection):
         KlattSection.__init__(self, mast)
         self.mixer = Mixer(mast=self.mast)
         self.firstdiff = Firstdiff(mast=self.mast)
+        self.components = [self.mixer, self.firstdiff]
 
     def patch(self):
         for _in in self.ins:
@@ -828,6 +848,7 @@ class OutputModule(KlattSection):
         self.mixer = Mixer(mast=self.mast)
         self.normalizer = Normalizer(mast=self.mast)
         self.output = np.zeros(self.mast.params["N_SAMP"])
+        self.components = [self.mixer, self.normalizer]
 
     def patch(self):
         for _in in self.ins:
@@ -962,6 +983,7 @@ class Impulse(KlattComponent):
             F0 (arrry): Array of F0 values at each sample
         """
         glot_period = np.round(self.mast.params["FS"]/F0)
+        self.last_glot_pulse = 0
         for n in range(self.mast.params["N_SAMP"]):
             if n - self.last_glot_pulse >= glot_period[n]:
                 self.output[n] = 1
@@ -1152,3 +1174,11 @@ class Switch(KlattComponent):
                 self.output[0][n] = 0
                 self.output[1][n] = self.input[n]
         self.send()
+
+    def clean(self):
+        self.output = []
+        self.output.append(np.zeros(self.mast.params["N_SAMP"]))
+        self.output.append(np.zeros(self.mast.params["N_SAMP"]))
+
+
+def make_ss_vowel(klsyn, f0, ff)
