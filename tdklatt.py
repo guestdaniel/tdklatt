@@ -36,14 +36,14 @@ Examples:
 try:
     import math
     import numpy as np
-    import sounddevice as sd
+    #import sounddevice as sd
 except ImportError:
     print("Missing one or more required modules.")
     print("Please make sure that math, numpy, and sounddevice are installed.")
     import sys
     sys.exit()
 
-def klatt_make(tvparams=None, ntvparams=None):
+def klatt_make(params=None):
     """
     Creates and prepares a KlattSynth object.
 
@@ -55,73 +55,34 @@ def klatt_make(tvparams=None, ntvparams=None):
     (time-varying first, and then non-time-varying).
 
     Arguments:
-        tvparams (TVParam1980): time-varying parameters object
-        ntvparams (NTVParam1980): non-time-varying parameters object
+        params (KlattParam1980): parameters object
 
     Returns:
         synth (KlattSynth): Klatt synthesizer object, ready to run()
     """
     # Choose defaults if custom parameters not available
-    if ntvparams is None:
-        ntvparams = NTVParam1980()
-    if tvparams is None:
-        tvparams = TVParam1980(ntvparams=ntvparams)
+    if params is None:
+        params = KlattParam1980()
     # Initialize synth
     synth = KlattSynth()
 
     # Loop through all time-varying parameters, processing as needed
     for param in list(filter(lambda aname: not aname.startswith("_"),
-                             dir(tvparams))):
+                             dir(params))):
         if param is "FF" or param is "BW":
             synth.params[param] = \
-                    [getattr(tvparams, param)[i] for i in range(ntvparams.N_FORM)]
+                    [getattr(params, param)[i] for i in range(params.N_FORM)]
         else:
-            synth.params[param] = getattr(tvparams, param)
-    # Loop through all non-time-varying parameters and load
-    for param in list(filter(lambda aname: not aname.startswith("_"),
-                             dir(ntvparams))):
-        synth.params[param] = getattr(ntvparams,param)
+            synth.params[param] = getattr(params, param)
     synth.setup()
     return(synth)
 
 
-class NTVParam1980(object):
+class KlattParam1980(object):
     """
-    Class container for non-time-varying parameters for Klatt 1980 synthesis.
+    Class container for parameters for Klatt 1980 synthesizer.
 
     Arguments:
-        FS (int): Sampling rate in Hz
-        N_FORM (int): Number of formants in vocal tract cascade simulation
-        DUR (float): Duration in seconds
-
-    Attributes:
-        FS (int): Sampling rate in Hz
-        N_FORM (int): Number of formants in vocal tract cascade simulation
-        DUR (float): Duration in seconds
-        N_SAMP (int): Number of samples to be synthesized
-        VER (string): Algorithm to be used in synthesis
-
-    Provides simple data storage and defaults for non-time-varying parameters
-    for KlattSynth's KLSYN80 algorithm.
-    """
-    def __init__(self, FS=10000,
-                       N_FORM=5,
-                       DUR=1):
-        self.FS = FS
-        self.DUR = DUR
-        self.N_FORM = N_FORM
-        self.N_SAMP = round(FS*DUR)
-        self.VER = "KLSYN80"
-
-
-class TVParam1980(object):
-    """
-    Class container for time-varying parameters for Klatt 1980 synthesis.
-
-    Arguments:
-        ntvparams (NTVParam1980): Non-time-varying parameters object, used to
-            determine the number of elements needed in the time-varying
-            parameter arrays
         F0 (float): Fundamental frequency in Hz
         FF (list): List of floats, each one corresponds to a formant frequency
             in Hz
@@ -154,39 +115,42 @@ class TVParam1980(object):
         Each of the above time-varying parameters is stored as an attribute in
             the form of a Numpy array.
     """
-    def __init__(self, ntvparams, F0=100,
+    def __init__(self, FS=10000, N_FORM=5, DUR=1, F0=100,
                        FF=[500, 1500, 2500, 3500, 4500],
                        BW=[50, 100, 100, 200, 250],
                        AV=0, AVS=0, AH=0, AF=0,
                        SW=0, FGP=0, BGP=100, FGZ=1500, BGZ=6000,
                        FNP=250, BNP=100, FNZ=250, BNZ=100, BGS=200,
-                       A1=0, A2=0, A3=0, A4=0, A5=0, A6=0, AN=0,
-                       N_FORM=5):
-        N_SAMP = ntvparams.N_SAMP
-        self.F0 = np.ones(N_SAMP)*F0
-        self.FF = [np.ones(N_SAMP)*FF[i] for i in range(N_FORM)]
-        self.BW = [np.ones(N_SAMP)*BW[i] for i in range(N_FORM)]
-        self.AV = np.ones(N_SAMP)*AV
-        self.AVS = np.ones(N_SAMP)*AVS
-        self.AH = np.ones(N_SAMP)*AH
-        self.AF = np.ones(N_SAMP)*AF
-        self.FNZ = np.ones(N_SAMP)*FNZ
-        self.SW = np.ones(N_SAMP)*SW
-        self.FGP = np.ones(N_SAMP)*FGP
-        self.BGP = np.ones(N_SAMP)*BGP
-        self.FGZ = np.ones(N_SAMP)*FGZ
-        self.BGZ = np.ones(N_SAMP)*BGZ
-        self.FNP = np.ones(N_SAMP)*FNP
-        self.BNP = np.ones(N_SAMP)*BNP
-        self.BNZ = np.ones(N_SAMP)*BNZ
-        self.BGS = np.ones(N_SAMP)*BGS
-        self.A1 = np.ones(N_SAMP)*A1
-        self.A2 = np.ones(N_SAMP)*A2
-        self.A3 = np.ones(N_SAMP)*A3
-        self.A4 = np.ones(N_SAMP)*A4
-        self.A5 = np.ones(N_SAMP)*A5
-        self.A6 = np.ones(N_SAMP)*A6
-        self.AN = np.ones(N_SAMP)*AN
+                       A1=0, A2=0, A3=0, A4=0, A5=0, A6=0, AN=0):
+        self.FS = FS
+        self.DUR = DUR
+        self.N_FORM = N_FORM
+        self.N_SAMP = round(FS*DUR)
+        self.VER = "KLSYN80"
+        self.F0 = np.ones(self.N_SAMP)*F0
+        self.FF = [np.ones(self.N_SAMP)*FF[i] for i in range(N_FORM)]
+        self.BW = [np.ones(self.N_SAMP)*BW[i] for i in range(N_FORM)]
+        self.AV = np.ones(self.N_SAMP)*AV
+        self.AVS = np.ones(self.N_SAMP)*AVS
+        self.AH = np.ones(self.N_SAMP)*AH
+        self.AF = np.ones(self.N_SAMP)*AF
+        self.FNZ = np.ones(self.N_SAMP)*FNZ
+        self.SW = np.ones(self.N_SAMP)*SW
+        self.FGP = np.ones(self.N_SAMP)*FGP
+        self.BGP = np.ones(self.N_SAMP)*BGP
+        self.FGZ = np.ones(self.N_SAMP)*FGZ
+        self.BGZ = np.ones(self.N_SAMP)*BGZ
+        self.FNP = np.ones(self.N_SAMP)*FNP
+        self.BNP = np.ones(self.N_SAMP)*BNP
+        self.BNZ = np.ones(self.N_SAMP)*BNZ
+        self.BGS = np.ones(self.N_SAMP)*BGS
+        self.A1 = np.ones(self.N_SAMP)*A1
+        self.A2 = np.ones(self.N_SAMP)*A2
+        self.A3 = np.ones(self.N_SAMP)*A3
+        self.A4 = np.ones(self.N_SAMP)*A4
+        self.A5 = np.ones(self.N_SAMP)*A5
+        self.A6 = np.ones(self.N_SAMP)*A6
+        self.AN = np.ones(self.N_SAMP)*AN
 
 
 class KlattSynth(object):
@@ -1179,6 +1143,3 @@ class Switch(KlattComponent):
         self.output = []
         self.output.append(np.zeros(self.mast.params["N_SAMP"]))
         self.output.append(np.zeros(self.mast.params["N_SAMP"]))
-
-
-def make_ss_vowel(klsyn, f0, ff)

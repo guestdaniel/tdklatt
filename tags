@@ -1,0 +1,86 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_OUTPUT_MODE	u-ctags	/u-ctags or e-ctags/
+!_TAG_PROGRAM_AUTHOR	Universal Ctags Team	//
+!_TAG_PROGRAM_NAME	Universal Ctags	/Derived from Exuberant Ctags/
+!_TAG_PROGRAM_URL	https://ctags.io/	/official site/
+!_TAG_PROGRAM_VERSION	0.0.0	/157918c/
+Amplifier	tdklatt.py	/^class Amplifier(KlattComponent):$/;"	c
+Buffer	tdklatt.py	/^class Buffer(KlattComponent):$/;"	c
+Firstdiff	tdklatt.py	/^class Firstdiff(KlattComponent):$/;"	c
+Impulse	tdklatt.py	/^class Impulse(KlattComponent):$/;"	c
+KlattCascade1980	tdklatt.py	/^class KlattCascade1980(KlattSection):$/;"	c
+KlattComponent	tdklatt.py	/^class KlattComponent:$/;"	c
+KlattNoise1980	tdklatt.py	/^class KlattNoise1980(KlattSection):$/;"	c
+KlattParallel1980	tdklatt.py	/^class KlattParallel1980(KlattSection):$/;"	c
+KlattParam1980	tdklatt.py	/^class KlattParam1980(object):$/;"	c
+KlattRadiation1980	tdklatt.py	/^class KlattRadiation1980(KlattSection):$/;"	c
+KlattSection	tdklatt.py	/^class KlattSection:$/;"	c
+KlattSynth	tdklatt.py	/^class KlattSynth(object):$/;"	c
+KlattVoice1980	tdklatt.py	/^class KlattVoice1980(KlattSection):$/;"	c
+Lowpass	tdklatt.py	/^class Lowpass(KlattComponent):$/;"	c
+Mixer	tdklatt.py	/^class Mixer(KlattComponent):$/;"	c
+Noisegen	tdklatt.py	/^class Noisegen(KlattComponent):$/;"	c
+Normalizer	tdklatt.py	/^class Normalizer(KlattComponent):$/;"	c
+OutputModule	tdklatt.py	/^class OutputModule(KlattSection):$/;"	c
+Resonator	tdklatt.py	/^class Resonator(KlattComponent):$/;"	c
+Switch	tdklatt.py	/^class Switch(KlattComponent):$/;"	c
+__init__	tdklatt.py	/^    def __init__(self):$/;"	m	class:KlattSynth
+__init__	tdklatt.py	/^    def __init__(self, FS=10000, N_FORM=5, DUR=1, F0=100,$/;"	m	class:KlattParam1980
+__init__	tdklatt.py	/^    def __init__(self, mast):$/;"	m	class:Amplifier
+__init__	tdklatt.py	/^    def __init__(self, mast):$/;"	m	class:Firstdiff
+__init__	tdklatt.py	/^    def __init__(self, mast):$/;"	m	class:Impulse
+__init__	tdklatt.py	/^    def __init__(self, mast):$/;"	m	class:KlattCascade1980
+__init__	tdklatt.py	/^    def __init__(self, mast):$/;"	m	class:KlattNoise1980
+__init__	tdklatt.py	/^    def __init__(self, mast):$/;"	m	class:KlattParallel1980
+__init__	tdklatt.py	/^    def __init__(self, mast):$/;"	m	class:KlattRadiation1980
+__init__	tdklatt.py	/^    def __init__(self, mast):$/;"	m	class:KlattSection
+__init__	tdklatt.py	/^    def __init__(self, mast):$/;"	m	class:KlattVoice1980
+__init__	tdklatt.py	/^    def __init__(self, mast):$/;"	m	class:Lowpass
+__init__	tdklatt.py	/^    def __init__(self, mast):$/;"	m	class:Mixer
+__init__	tdklatt.py	/^    def __init__(self, mast):$/;"	m	class:Noisegen
+__init__	tdklatt.py	/^    def __init__(self, mast):$/;"	m	class:Normalizer
+__init__	tdklatt.py	/^    def __init__(self, mast):$/;"	m	class:OutputModule
+__init__	tdklatt.py	/^    def __init__(self, mast):$/;"	m	class:Switch
+__init__	tdklatt.py	/^    def __init__(self, mast, anti=False):$/;"	m	class:Resonator
+__init__	tdklatt.py	/^    def __init__(self, mast, dests=None):$/;"	m	class:Buffer
+__init__	tdklatt.py	/^    def __init__(self, mast, dests=None):$/;"	m	class:KlattComponent
+amplify	tdklatt.py	/^    def amplify(self, dB):$/;"	m	class:Amplifier
+calc_coef	tdklatt.py	/^    def calc_coef(self, ff, bw):$/;"	m	class:Resonator
+clean	tdklatt.py	/^    def clean(self):$/;"	m	class:KlattComponent
+clean	tdklatt.py	/^    def clean(self):$/;"	m	class:Switch
+connect	tdklatt.py	/^    def connect(self, components):$/;"	m	class:KlattComponent
+connect	tdklatt.py	/^    def connect(self, sections):$/;"	m	class:KlattSection
+differentiate	tdklatt.py	/^    def differentiate(self):$/;"	m	class:Firstdiff
+do	tdklatt.py	/^    def do(self):$/;"	m	class:KlattCascade1980
+do	tdklatt.py	/^    def do(self):$/;"	m	class:KlattNoise1980
+do	tdklatt.py	/^    def do(self):$/;"	m	class:KlattParallel1980
+do	tdklatt.py	/^    def do(self):$/;"	m	class:KlattRadiation1980
+do	tdklatt.py	/^    def do(self):$/;"	m	class:KlattVoice1980
+do	tdklatt.py	/^    def do(self):$/;"	m	class:OutputModule
+filter	tdklatt.py	/^    def filter(self):$/;"	m	class:Lowpass
+generate	tdklatt.py	/^    def generate(self):$/;"	m	class:Noisegen
+impulse_gen	tdklatt.py	/^    def impulse_gen(self, F0):$/;"	m	class:Impulse
+klatt_make	tdklatt.py	/^def klatt_make(params=None):$/;"	f
+mix	tdklatt.py	/^    def mix(self):$/;"	m	class:Mixer
+normalize	tdklatt.py	/^    def normalize(self):$/;"	m	class:Normalizer
+np	tdklatt.py	/^    import numpy as np$/;"	I
+operate	tdklatt.py	/^    def operate(self, choice):$/;"	m	class:Switch
+patch	tdklatt.py	/^    def patch(self):$/;"	m	class:KlattCascade1980
+patch	tdklatt.py	/^    def patch(self):$/;"	m	class:KlattNoise1980
+patch	tdklatt.py	/^    def patch(self):$/;"	m	class:KlattParallel1980
+patch	tdklatt.py	/^    def patch(self):$/;"	m	class:KlattRadiation1980
+patch	tdklatt.py	/^    def patch(self):$/;"	m	class:KlattVoice1980
+patch	tdklatt.py	/^    def patch(self):$/;"	m	class:OutputModule
+play	tdklatt.py	/^    def play(self):$/;"	m	class:KlattSynth
+process	tdklatt.py	/^    def process(self):$/;"	m	class:Buffer
+process_ins	tdklatt.py	/^    def process_ins(self):$/;"	m	class:KlattSection
+process_outs	tdklatt.py	/^    def process_outs(self):$/;"	m	class:KlattSection
+receive	tdklatt.py	/^    def receive(self, signal):$/;"	m	class:KlattComponent
+receive	tdklatt.py	/^    def receive(self, signal):$/;"	m	class:Mixer
+resonate	tdklatt.py	/^    def resonate(self, ff, bw):$/;"	m	class:Resonator
+run	tdklatt.py	/^    def run(self):$/;"	m	class:KlattSection
+run	tdklatt.py	/^    def run(self):$/;"	m	class:KlattSynth
+send	tdklatt.py	/^    def send(self):$/;"	m	class:KlattComponent
+send	tdklatt.py	/^    def send(self):$/;"	m	class:Switch
+setup	tdklatt.py	/^    def setup(self):$/;"	m	class:KlattSynth
