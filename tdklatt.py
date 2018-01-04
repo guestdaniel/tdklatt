@@ -127,6 +127,7 @@ class KlattParam1980(object):
         self.N_FORM = N_FORM
         self.N_SAMP = round(FS*DUR)
         self.VER = "KLSYN80"
+        self.DT = 1/FS
         self.F0 = np.ones(self.N_SAMP)*F0
         self.FF = [np.ones(self.N_SAMP)*FF[i] for i in range(N_FORM)]
         self.BW = [np.ones(self.N_SAMP)*BW[i] for i in range(N_FORM)]
@@ -233,18 +234,14 @@ class KlattSynth(object):
         """
         Sets up KlattSynth.
 
-        Run after parameter values are set. Initializes output vector, derives
-        necessary variables from input parameters, initializes sections and
-        sets them to be attributes.
+        Run after parameter values are set. Initializes output vector initializes
+        sections and sets them to be attributes.
 
         NOTE: it's probably bad practice to create new attributes outside of
         __init__(), but this is the approach for now...
         """
         # Initialize data vectors
         self.output = np.zeros(self.params["N_SAMP"])
-
-        # Derive dt
-        self.params["DT"] = 1/self.params["FS"]
 
         # Differential functiontioning based on version...
         if self.params["VER"] == "KLSYN80":
