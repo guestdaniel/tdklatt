@@ -283,6 +283,16 @@ class KlattSynth(object):
             section.run()
         self.output[:] = self.output_module.output[:]
 
+    def _get_int16at16K(self):
+        from scipy.signal import resample_poly
+        assert self.params["FS"] == 10_000
+        y = resample_poly(self.output, 8, 5)  # resample from 10K to 16K
+        maxabs = np.max(np.abs(y))
+        if maxabs > 1:
+            y /= maxabs
+        y = np.round(y * 32767).astype(np.int16)
+        return y
+
     def play(self):
         """
         Plays output waveform.
@@ -291,14 +301,15 @@ class KlattSynth(object):
         """
         #sd.play(data=self.output, samplerate=self.params["FS"])
         import simpleaudio as sa
-        from scipy.signal import resample_poly
-        assert self.params["FS"] == 10_000
-        y = resample_poly(self.output, 8, 5)  # resample from 10K to 16K
-        maxabs = np.max(np.abs(y))
-        if maxabs > 1:
-            y /= maxabs
-        y = np.round(y * 32767).astype(np.int16)
+
+        y = self._get_int16at16K()
         sa.play_buffer(y, num_channels=1, bytes_per_sample=2, sample_rate=16_000)
+
+    def save(self, path):
+        from scipy.io.wavfile import write
+        y = self._get_int16at16K()
+        write(path, 16_000, y)
+
 
 
 ##### CLASS DEFINITIONS #####
@@ -1168,6 +1179,7 @@ if __name__ == '__main__':
     s.params["FF"] = FF.T
     s.run()
     s.play()
+    s.save('synth.wav')
 
     import matplotlib.pyplot as plt
     ax = plt.subplot(211)
@@ -1177,4 +1189,5 @@ if __name__ == '__main__':
     plt.specgram(s.output, Fs=s.params['FS'])
     plt.xlabel('time [s]')
     plt.ylabel('frequency [Hz]')
+    plt.savefig('figure.pdf')
     plt.show()
