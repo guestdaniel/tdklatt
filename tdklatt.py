@@ -289,7 +289,16 @@ class KlattSynth(object):
 
         Uses sounddevice to play output waveform.
         """
-        sd.play(data=self.output, samplerate=self.params["FS"])
+        #sd.play(data=self.output, samplerate=self.params["FS"])
+        import simpleaudio as sa
+        from scipy.signal import resample_poly
+        assert self.params["FS"] == 10_000
+        y = resample_poly(self.output, 8, 5)  # resample from 10K to 16K
+        maxabs = np.max(np.abs(y))
+        if maxabs > 1:
+            y /= maxabs
+        y = np.round(y * 32767).astype(np.int16)
+        sa.play_buffer(y, num_channels=1, bytes_per_sample=2, sample_rate=16_000)
 
 
 ##### CLASS DEFINITIONS #####
@@ -1140,3 +1149,32 @@ class Switch(KlattComponent):
         self.output = []
         self.output.append(np.zeros(self.mast.params["N_SAMP"]))
         self.output.append(np.zeros(self.mast.params["N_SAMP"]))
+
+
+if __name__ == '__main__':
+    s = klatt_make() # Creates a Klatt synthesizer w/ default settings
+    N = s.params["N_SAMP"]
+    s.params["F0"] = np.linspace(120, 70, N)  # a falling F0 contour
+    FF = np.asarray(s.params["FF"]).T
+    target1 = np.r_[750, 1100, 2600]  # /A/
+    target2 = np.r_[280, 2250, 2750]  # /i/
+    if 0:  # linear transition
+        xfade = np.linspace(1, 0, N)
+    else:
+        n = np.arange(N)
+        power = 0.5
+        xfade = 1 - (n / (N - 1)) ** power
+    FF[:,:3] = np.outer(xfade, target1) + np.outer((1 - xfade), target2)
+    s.params["FF"] = FF.T
+    s.run()
+    s.play()
+
+    import matplotlib.pyplot as plt
+    ax = plt.subplot(211)
+    plt.plot(np.arange(len(s.output)) / s.params['FS'], s.output)
+    plt.ylabel('amplitude')
+    plt.subplot(212, sharex=ax)
+    plt.specgram(s.output, Fs=s.params['FS'])
+    plt.xlabel('time [s]')
+    plt.ylabel('frequency [Hz]')
+    plt.show()
