@@ -19,13 +19,18 @@ Functions:
         NTVParam1980 and TVParam1980 objects
 
 Examples:
+    Create a /pa/ and plot a figure showing the spectrogram and time waveform.
+    >>> python tdklatt.py
+
     Create a synthesizer with default settings, run it, and hear the output.
+    >>> python
     >>> from tdklatt import *
     >>> s = klatt_make()
     >>> s.run()
     >>> s.play()
 
     Create a synthesizer, change the F0, and hear the output.
+    >>> python
     >>> from tdklatt import *
     >>> s = klatt_make()
     >>> s.params["F0"] = np.ones(s.params["N_SAMP"])*200 # Change F0 to 200 Hz
@@ -36,10 +41,12 @@ Examples:
 try:
     import math
     import numpy as np
-    #import sounddevice as sd
+    from scipy.signal import resample_poly
+    from scipy.io.wavfile import write
+    import simpleaudio as sa
 except ImportError:
     print("Missing one or more required modules.")
-    print("Please make sure that math, numpy, and sounddevice are installed.")
+    print("Please make sure that math, numpy, scipy, and simpleaudio are installed.")
     import sys
     sys.exit()
 
@@ -118,7 +125,7 @@ class KlattParam1980(object):
     def __init__(self, FS=10000, N_FORM=5, DUR=1, F0=100,
                        FF=[500, 1500, 2500, 3500, 4500],
                        BW=[50, 100, 100, 200, 250],
-                       AV=0, AVS=0, AH=0, AF=0,
+                       AV=60, AVS=0, AH=0, AF=0,
                        SW=0, FGP=0, BGP=100, FGZ=1500, BGZ=6000,
                        FNP=250, BNP=100, FNZ=250, BNZ=100, BGS=200,
                        A1=0, A2=0, A3=0, A4=0, A5=0, A6=0, AN=0):
@@ -284,7 +291,9 @@ class KlattSynth(object):
         self.output[:] = self.output_module.output[:]
 
     def _get_int16at16K(self):
-        from scipy.signal import resample_poly
+        """
+        Transforms output waveform to form amenable for playing/saving.
+        """
         assert self.params["FS"] == 10_000
         y = resample_poly(self.output, 8, 5)  # resample from 10K to 16K
         maxabs = np.max(np.abs(y))
@@ -296,20 +305,19 @@ class KlattSynth(object):
     def play(self):
         """
         Plays output waveform.
-
-        Uses sounddevice to play output waveform.
         """
-        #sd.play(data=self.output, samplerate=self.params["FS"])
-        import simpleaudio as sa
-
         y = self._get_int16at16K()
         sa.play_buffer(y, num_channels=1, bytes_per_sample=2, sample_rate=16_000)
 
     def save(self, path):
-        from scipy.io.wavfile import write
+        """
+        Saves output waveform to disk.
+
+        Arguments:
+            path (str): where the file should be saved
+        """
         y = self._get_int16at16K()
         write(path, 16_000, y)
-
 
 
 ##### CLASS DEFINITIONS #####
