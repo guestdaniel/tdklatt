@@ -181,7 +181,7 @@ class KlattSynth(object):
     method with performs the operation that section is designed to do. For
     example, a KlattVoice section's run() method generates a voicing waveform.
 
-    KlattSynth's params attribute will need to be provided with paramters, there
+    KlattSynth's params attribute will need to be provided with parameters, there
     are no built-in defaults! Currently the only way to do so is to generate a
     KlattSynth object through the klatt_make function available in interface.py
     or to do so manually. params is just a dictionary that can be directly
@@ -283,13 +283,33 @@ class KlattSynth(object):
             section.run()
         self.output[:] = self.output_module.output[:]
 
+    def _get_int16at16K(self):
+        from scipy.signal import resample_poly
+        assert self.params["FS"] == 10_000
+        y = resample_poly(self.output, 8, 5)  # resample from 10K to 16K
+        maxabs = np.max(np.abs(y))
+        if maxabs > 1:
+            y /= maxabs
+        y = np.round(y * 32767).astype(np.int16)
+        return y
+
     def play(self):
         """
         Plays output waveform.
 
         Uses sounddevice to play output waveform.
         """
-        sd.play(data=self.output, samplerate=self.params["FS"])
+        #sd.play(data=self.output, samplerate=self.params["FS"])
+        import simpleaudio as sa
+
+        y = self._get_int16at16K()
+        sa.play_buffer(y, num_channels=1, bytes_per_sample=2, sample_rate=16_000)
+
+    def save(self, path):
+        from scipy.io.wavfile import write
+        y = self._get_int16at16K()
+        write(path, 16_000, y)
+
 
 
 ##### CLASS DEFINITIONS #####
@@ -563,7 +583,7 @@ class KlattNoise1980(KlattSection):
     def do(self):
         self.noisegen.generate()
         self.lowpass.filter()
-        self.amp.amplify(dB=-1000) # Need to figure out a real value
+        self.amp.amplify(dB=-60)  # TODO: Need to figure out a real value
 
 
 class KlattCascade1980(KlattSection):
@@ -700,11 +720,11 @@ class KlattParallel1980(KlattSection):
         self.r4 = Resonator(mast=self.mast)
         self.a5 = Amplifier(mast=self.mast)
         self.r5 = Resonator(mast=self.mast)
-        # 6th formant currently not part of self.do()! Not sure what values
+        # TODO: 6th formant currently not part of self.do()! Not sure what values
         # to give to it... need to keep reading Klatt 1980.
         self.a6 = Amplifier(mast=self.mast)
         self.r6 = Resonator(mast=self.mast)
-        # ab currently not part of self.do()! Not sure what values to give
+        # TODO: ab currently not part of self.do()! Not sure what values to give
         # to it... need to keep reading Klatt 1980.
         self.ab = Amplifier(mast=self.mast)
         self.output_mixer = Mixer(mast=self.mast)
@@ -1140,3 +1160,64 @@ class Switch(KlattComponent):
         self.output = []
         self.output.append(np.zeros(self.mast.params["N_SAMP"]))
         self.output.append(np.zeros(self.mast.params["N_SAMP"]))
+
+
+if __name__ == '__main__':
+    s = klatt_make(KlattParam1980(DUR=0.5)) # Creates a Klatt synthesizer w/ default settings
+    # see also: http://www.fon.hum.uva.nl/david/ma_ssp/doc/Klatt-1980-JAS000971.pdf
+    N = s.params["N_SAMP"]
+    F0 = s.params["F0"]
+    FF = np.asarray(s.params["FF"]).T
+    AV = s.params["AV"]
+    AH = s.params['AH']
+
+    # amplitude / voicing
+    AV[:] = np.linspace(1, 0, N) ** 0.1 * 60
+    if 1:  # unvoiced consonant
+        Nv1 = 800  # start of unvoiced-voiced transition
+        Nv2 = 1000  # end of unvoiced-voiced transition
+        AV[:Nv1] = 0
+        AH[:Nv1] = 55
+        AV[Nv1:Nv2] = np.linspace(0, AV[Nv2], Nv2-Nv1)
+        AH[Nv1:Nv2] = np.linspace(55, 0, Nv2-Nv1)
+
+
+    # F0
+    F0[:] = np.linspace(120, 70, N)  # a falling F0 contour
+
+    # FF
+    target1 = np.r_[300, 1000, 2600]  # /b/
+    #target2 = np.r_[280, 2250, 2750]  # /i/
+    target2 = np.r_[750, 1300, 2600]  # /A/
+    if 0:  # linear transition
+        xfade = np.linspace(1, 0, N)
+    else:  # exponential transition
+        n = np.arange(N)
+        scaler = 20
+        xfade = 2 / (1 + np.exp(scaler * n / (N-1)))
+    FF[:,:3] = np.outer(xfade, target1) + np.outer((1 - xfade), target2)
+
+    # synthesize
+    s.params["FF"] = FF.T
+    s.run()
+    s.play()
+    s.save('synth.wav')
+
+    # visualize
+    t = np.arange(len(s.output)) / s.params['FS']
+    import matplotlib.pyplot as plt
+    ax = plt.subplot(211)
+    plt.plot(t, s.output)
+    plt.axis(ymin=-1, ymax=1)
+    plt.ylabel('amplitude')
+    plt.twinx()
+    plt.plot(t, AV, 'r', label='AV')
+    plt.plot(t, AH, 'g', label='AH')
+    plt.legend()
+    plt.subplot(212, sharex=ax)
+    plt.specgram(s.output, Fs=s.params['FS'])
+    plt.plot(t, FF, alpha=0.5)
+    plt.xlabel('time [s]')
+    plt.ylabel('frequency [Hz]')
+    plt.savefig('figure.pdf')
+    plt.show()
