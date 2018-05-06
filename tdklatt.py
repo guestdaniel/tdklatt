@@ -6,8 +6,7 @@ speech waveforms ala Klatt 1980. Currently supports the Klatt 1980 algorithm at
 10 kHz sampling rate.
 
 Classes:
-    NTVParam1980: Non-time-varying parameters
-    TVParam1980: Time-varying parameters
+    KlattParam1980: Object containing all paramteres for Klatt synthesizer
     KlattSynth: Top-level KlattSynth object.
     KlattSection: Section-level synthesis object (e.g., voicing source or
         filter cascade)
@@ -16,7 +15,7 @@ Classes:
 
 Functions:
     klatt_make: Creates a KlattSynth object and properly initializes it using
-        NTVParam1980 and TVParam1980 objects
+        a KlattParam1980 object
 
 Examples:
     Create a /pa/ and plot a figure showing the spectrogram and time waveform.
@@ -54,12 +53,11 @@ def klatt_make(params=None):
     """
     Creates and prepares a KlattSynth object.
 
-    The user can provide a TVParams1980 object to the tvparams argument and a
-    NTVParam1980 object to the ntvparams argument, if they wish to initialize
-    those objects and modify parameter values first. If none are provided, then
-    defaults are initialized and used. First, the KlattSynth object is
-    initialized, and then each parameter passed to the KlattSynth object
-    (time-varying first, and then non-time-varying).
+    The user can provide a KlattParam1980 object to the params argument
+    if they wish to initialize those objects and modify parameter values
+    first. If none is provided, then a default param object is initialized
+    and used. First, the KlattSynth object is
+    initialized, and then each parameter passed to the KlattSynth object.
 
     Arguments:
         params (KlattParam1980): parameters object
