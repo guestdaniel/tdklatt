@@ -10,7 +10,7 @@ Usage
 =====
 Right now, all of the classes and functions of tdklatt are available as a single module (`tdklatt.py`). In the future, it will likely be distributed in a package format instead.
 
-To use tdklatt, all you need to do is clone the repository, and to ensure that you have the dependencies installed. They're listed in the requirements.txt file in this repository. To clone the repository, type the following in a terminal:
+To use tdklatt, all you need to do is clone the repository, and to ensure that you have the dependencies installed. They're listed in the `requirements.txt` file in this repository. To clone the repository, type the following in a terminal:
 
 ```
 git clone https://github.com/guestdaniel/tdklatt 
